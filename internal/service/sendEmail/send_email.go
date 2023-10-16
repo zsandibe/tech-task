@@ -1,70 +1,35 @@
 package sendEmail
 
 import (
-	"crypto/tls"
-	"net/smtp"
+	"io"
+	"strconv"
+
+	"gopkg.in/gomail.v2"
 )
 
-func (s *SendEmailService) SendFileToEmail(fileData []byte, toEmails []string) error {
-	auth := smtp.PlainAuth("", s.config.SMTPUsername, s.config.SMTPPassword, s.config.SMTPServer)
+func (s *SendEmailService) SendFileToEmail(emails []string, file io.Reader, fileName string) error {
+	// Отправляем сообщение каждому адресату
+	for _, email := range emails {
+		msg := gomail.NewMessage()
+		msg.SetHeader("From", s.config.SMTPUsername)
+		msg.SetHeader("To", email)
+		msg.SetHeader("Subject", "File from Golang")
+		msg.SetBody("text/plain", "This is the file you requested.")
 
-	tlsConfig := &tls.Config{
-		ServerName: s.config.SMTPServer,
-	}
+		msg.Attach(fileName, gomail.SetCopyFunc(func(w io.Writer) error {
+			_, err := io.Copy(w, file)
+			return err
+		}))
 
-	for _, toEmail := range toEmails {
-		// Create the email message
-		from := s.config.SMTPUsername
-
-		to := toEmail
-
-		// Establish a TLS connection
-		client, err := smtp.Dial(s.config.SMTPServer + ":" + s.config.SMTPPort)
+		port, err := strconv.Atoi(s.config.SMTPPort)
 		if err != nil {
 			return err
 		}
 
-		err = client.StartTLS(tlsConfig)
-		if err != nil {
-			return err
-		}
-
-		// Authenticate and send the email
-		err = client.Auth(auth)
-		if err != nil {
-			return err
-		}
-
-		err = client.Mail(from)
-		if err != nil {
-			return err
-		}
-
-		err = client.Rcpt(to)
-		if err != nil {
-			return err
-		}
-
-		w, err := client.Data()
-		if err != nil {
-			return err
-		}
-
-		_, err = w.Write(fileData)
-		if err != nil {
-			return err
-		}
-
-		err = w.Close()
-		if err != nil {
-			return err
-		}
-
-		err = client.Quit()
-		if err != nil {
+		d := gomail.NewDialer(s.config.SMTPServer, port, s.config.SMTPUsername, s.config.SMTPPassword)
+		if err := d.DialAndSend(msg); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }

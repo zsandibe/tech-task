@@ -1,7 +1,9 @@
 package sendEmail
 
+import "io"
+
 type SendEmailProvider interface {
-	SendFileToEmail(fileData []byte, toEmails []string) error
+	SendFileToEmail(emails []string, file io.Reader, fileName string) error
 }
 
 type SendEmailHandler struct {

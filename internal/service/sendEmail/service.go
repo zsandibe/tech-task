@@ -2,10 +2,11 @@ package sendEmail
 
 import (
 	"doodocsTask/config"
+	"io"
 )
 
 type Send interface {
-	SendFileToEmail(fileData []byte, toEmails []string) error
+	SendFileToEmail(emails []string, file io.Reader, fileName string) error
 }
 
 type SendEmailService struct {

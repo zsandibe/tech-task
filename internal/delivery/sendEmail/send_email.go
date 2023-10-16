@@ -1,47 +1,54 @@
 package sendEmail
 
 import (
-	"bytes"
-	"io"
+	// Импортируйте библиотеку mimetype
 	"net/http"
+	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 )
 
-func (h *SendEmailHandler) SendEmail(c *gin.Context) {
-	// Get the file from the request
-	file, fileHeader, err := c.Request.FormFile("file")
+func (s *SendEmailHandler) SendEmail(c *gin.Context) {
+	// Получаем файл и список почт из запроса
+	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the file"})
-		return
-	}
-	defer file.Close()
-
-	// Check the MIME type of the file
-	mime := fileHeader.Header.Get("Content-Type")
-	if mime != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" &&
-		mime != "application/pdf" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
 		return
 	}
 
-	// Get the list of emails from the request
-	emails := c.PostFormArray("emails")
+	emailsStr := c.PostForm("emails")
+	emails := strings.Split(emailsStr, ",")
 
-	// Create a buffer to store the file data
-	fileData := bytes.Buffer{}
-	if _, err := io.Copy(&fileData, file); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file data"})
-		return
+	// Ограничение на типы файлов
+	allowedMimeTypes := map[string]bool{
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+		"application/pdf": true,
 	}
 
-	// Send the email
-	err = h.send.SendFileToEmail(fileData.Bytes(), emails)
+	fileHeader, err := file.Open()
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to open file"})
+		return
+	}
+
+	// Определение точного MIME-типа файла
+	mime, err := mimetype.DetectReader(fileHeader)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to detect MIME type"})
+		return
+	}
+
+	if !allowedMimeTypes[mime.String()] {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
+		return
+	}
+
+	// Отправляем файл по почте
+	if err := s.send.SendFileToEmail(emails, fileHeader, file.Filename); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email"})
 		return
 	}
 
-	// Return a success message
 	c.JSON(http.StatusOK, gin.H{"message": "Email sent successfully"})
 }
