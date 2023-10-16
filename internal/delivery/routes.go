@@ -24,7 +24,7 @@ func (h *Handler) Routes() *gin.Engine {
 		{
 			archive.POST("/info", h.Info.GetInfoByArchive)
 			archive.POST("/create", h.Create.CreateArchiveByFiles)
-
+			archive.POST("/mail", h.Send.SendEmail)
 		}
 	}
 

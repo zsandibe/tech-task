@@ -15,7 +15,7 @@ func Start() {
 		log.Fatal(err)
 	}
 
-	service := service.NewService()
+	service := service.NewService(config)
 
 	delivery := delivery.NewHandler(service)
 

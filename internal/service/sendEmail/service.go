@@ -1,9 +1,19 @@
 package sendEmail
 
-// type Email interface {
-// }
+import (
+	"doodocsTask/config"
+)
 
-// type SendEmailService struct {
-// }
+type Send interface {
+	SendFileToEmail(fileData []byte, toEmails []string) error
+}
 
-// func NewSendEmailService() *SendEmailService {}
+type SendEmailService struct {
+	config config.Config
+}
+
+func NewSendEmailService(config config.Config) *SendEmailService {
+	return &SendEmailService{
+		config: config,
+	}
+}

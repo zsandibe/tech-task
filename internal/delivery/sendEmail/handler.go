@@ -1,11 +1,15 @@
 package sendEmail
 
-// type SendEmailProvider interface {
-// }
+type SendEmailProvider interface {
+	SendFileToEmail(fileData []byte, toEmails []string) error
+}
 
-// type SendEmailHandler struct {
-// }
+type SendEmailHandler struct {
+	send SendEmailProvider
+}
 
-// func NewSendEmailHandler() *SendEmailHandler {
-
-// }
+func NewSendEmailHandler(send SendEmailProvider) *SendEmailHandler {
+	return &SendEmailHandler{
+		send: send,
+	}
+}
