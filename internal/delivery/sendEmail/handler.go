@@ -1,11 +1,11 @@
 package sendEmail
 
-type SendEmailProvider interface {
-}
+// type SendEmailProvider interface {
+// }
 
-type SendEmailHandler struct {
-}
+// type SendEmailHandler struct {
+// }
 
-func NewSendEmailHandler() *SendEmailHandler {
+// func NewSendEmailHandler() *SendEmailHandler {
 
-}
+// }

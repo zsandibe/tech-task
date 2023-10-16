@@ -1,7 +1,7 @@
 package main
 
+import "doodocsTask/internal/app"
 
-
-func main(){
-	
+func main() {
+	app.Start()
 }

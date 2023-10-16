@@ -1,9 +1,9 @@
 package sendEmail
 
-type Email interface {
-}
+// type Email interface {
+// }
 
-type SendEmailService struct {
-}
+// type SendEmailService struct {
+// }
 
-func NewSendEmailService() *SendEmailService {}
+// func NewSendEmailService() *SendEmailService {}
