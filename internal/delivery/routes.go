@@ -11,7 +11,7 @@ func (h *Handler) Routes() *gin.Engine {
 
 	router.Use(func(c *gin.Context) {
 		if c.Request.Method != "POST" {
-			c.JSON(http.StatusMethodNotAllowed, gin.H{"error": http.StatusMethodNotAllowed})
+			c.JSON(http.StatusMethodNotAllowed, gin.H{"error": http.StatusText(http.StatusMethodNotAllowed)})
 			c.Abort()
 			return
 		}
@@ -22,10 +22,14 @@ func (h *Handler) Routes() *gin.Engine {
 	{
 		archive := api.Group("/archive")
 		{
-			archive.POST("/info", h.Info.GetInfoByArchive)
-			archive.POST("/create", h.Create.CreateArchiveByFiles)
-			archive.POST("/mail", h.Send.SendEmail)
+			archive.POST("/information", h.Info.GetInfoByArchive)
+			archive.POST("/files", h.Create.CreateArchiveByFiles)
 		}
+		mail := api.Group("/mail")
+		{
+			mail.POST("/file", h.Send.SendEmail)
+		}
+
 	}
 
 	return router

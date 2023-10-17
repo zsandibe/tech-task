@@ -2,6 +2,7 @@ package sendEmail
 
 import (
 	// Импортируйте библиотеку mimetype
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -32,14 +33,14 @@ func (s *SendEmailHandler) SendEmail(c *gin.Context) {
 		return
 	}
 
-	// Определение точного MIME-типа файла
 	mime, err := mimetype.DetectReader(fileHeader)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to detect MIME type"})
 		return
 	}
-
+	fmt.Println(mime)
 	if !allowedMimeTypes[mime.String()] {
+		fmt.Println("OK")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
 		return
 	}
