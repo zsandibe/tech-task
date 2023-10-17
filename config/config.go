@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -17,10 +16,7 @@ type Config struct {
 }
 
 func NewConfig() (Config, error) {
-	err := godotenv.Load(filepath.Join(".", ".env"))
-	if err != nil {
-		return Config{}, err
-	}
+	godotenv.Load(".env")
 	return Config{
 		Port:         os.Getenv("PORT"),
 		Host:         os.Getenv("HOST"),

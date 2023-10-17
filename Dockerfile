@@ -1,12 +1,23 @@
 FROM golang:alpine AS build
-ENV CGO_ENABLED=1
-RUN apk add --no-cache \
-    gcc \
-    musl-dev
+
 WORKDIR /app
+
 COPY . .
-RUN go build -o task ./cmd/main.go
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/
+
 FROM alpine:latest
 WORKDIR /app
+
+
 COPY --from=build /app .
-CMD ["./task"]
+
+
+
+# Copy the built Go binary from the build stage to the runtime stage
+
+# Expose port 8080 to the outside world
+EXPOSE 8080
+
+# Set the entry point for the container
+CMD ["./main"]
